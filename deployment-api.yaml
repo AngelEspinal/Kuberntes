@@ -1,0 +1,101 @@
+#---------------------pod api --------------------
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name:  api
+<<<<<<< HEAD
+  namespace: practicainnovar
+  #namespace : default
+=======
+  #namespace: practicainnovar
+  namespace : default
+>>>>>>> e5ac38c3d02a6a01853da0e4d2f7c945f9d77090
+  labels:
+    app:  api
+spec:
+  selector:
+    matchLabels:
+      app: api
+  replicas: 5
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app:  api
+    spec:
+<<<<<<< HEAD
+      #imagePullSecrets:
+      #  - name: acr-secret
+=======
+      imagePullSecrets:
+        - name: acr-secret
+>>>>>>> e5ac38c3d02a6a01853da0e4d2f7c945f9d77090
+      # initContainers:
+        # Init containers are exactly like regular containers, except:
+          # - Init containers always run to completion.
+          # - Each init container must complete successfully before the next one starts.
+      containers:
+        - name:  api
+<<<<<<< HEAD
+          image: innovaritp.azurecr.io/infolimpieza-api:v0
+=======
+          image: innovarpractica.azurecr.io/docker-compose-api:backend
+>>>>>>> e5ac38c3d02a6a01853da0e4d2f7c945f9d77090
+          imagePullPolicy: Always
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "100Mi"
+            limits:
+              cpu: 500m
+<<<<<<< HEAD
+              memory: 3Gi
+=======
+              memory: 1Gi
+>>>>>>> e5ac38c3d02a6a01853da0e4d2f7c945f9d77090
+          env:
+          - name : SA_USERNAME
+            valueFrom:
+              secretKeyRef:
+                name: mssql
+                key: SA_USERNAME
+
+          - name: SA_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: mssql
+                key: SA_PASSWORD      
+          ports:
+          - containerPort:  80
+            name:  api
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: api
+<<<<<<< HEAD
+  namespace: practicainnovar
+  #namespace : default
+=======
+  #namespace: practicainnovar
+  namespace : default
+>>>>>>> e5ac38c3d02a6a01853da0e4d2f7c945f9d77090
+  labels:
+    app: api
+spec:
+  #type: NodePort
+  type: LoadBalancer
+  selector:
+    app: api
+  ports:
+    - protocol: TCP
+      port: 80
+<<<<<<< HEAD
+      targetPort: 80
+=======
+      targetPort: 80
+>>>>>>> e5ac38c3d02a6a01853da0e4d2f7c945f9d77090

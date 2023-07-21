@@ -1,0 +1,75 @@
+// instalar en windows virtualizador Hyper-V
+https://pureinfotech.com/enable-hyper-v-windows-11/#enable_hyperv_home_windows11
+//--start you clustering
+// obteenr  conmutador virtual 
+PS C:\Windows\system32> Get-VMSwitch
+// si no existe crearlo y iniciar el clustering local
+	-  si no permite crear  una maquina minikube --> minikube delete --all --purge o Restart-Service vmcompute
+
+	- iniciar minikube start --vm-driver=hyperv, o minikube start --vm-driver=hyperv --hyperv-virtual-switch="Default Switch"
+
+
+// Después de iniciar Minikube, puedes configurar tu contexto de Kubernetes para apuntar al clúster local de Minikube utilizando el siguiente comando:
+kubectl config use-context minikube
+#-------secrets
+	-creating secrets mssql
+		kubectl create secret generic mssql --from-literal=SA_PASSWORD=@ngelXXR1999
+		kubectl create secret generic mssql --from-literal=SA_USER=mydb --from-literal=SA_PASSWORD=angelXXR1999
+	-view the secrets mssql
+		 kubectl get secret mssql -o yaml
+	-deete the secrets
+#--------------sqlcmd
+	- get port 
+		kubectl get service -A #any/30884
+	- get to ip minikube
+		minikube ip # 172.27.36.129
+	- access server sqlserver 
+		sqlcmd -S 172.27.36.129,30884 -U sa -P @ngelXXR1999
+ 
+
+#------------entrar al archivo kube-apiserver.yaml del cluster minikube
+	- minikube ssh
+
+	- sudo cat /etc/kubernetes/manifests/kube-apiserver.yaml | grep etcd
+#-------------subir iamgesnes a azure
+	# crear un registro en container registre 
+	#  instalar azure https://learn.microsoft.com/en-us/cli/azure/install-azure-cli-windows?tabs=powershell
+	#  logearse la cuenta en power shell --> az acr login --name innovarpractica
+	# subir nuestras images
+		- etiquetar la imagen --> docker tag nombre-de-imagen innovarpractica.azurecr.io/nombre-de-imagen:backend
+		-subir la  iamgen  --> docker push nombre-de-imagen:etiqueta
+		- listar images -> az acr repository  list --name innovarpractica
+		- listar todas las imageens -->> az acr list -o table
+		- logeo a azure dentro de minikube ssh --> docker login innovarpractica.azurecr.io
+#--------------------para otorgar credenciales a minikube del azure container registre  ejecutar esto
+	kubectl create secret docker-registry acr-secret --docker-server=innovarpractica.azurecr.io --docker-username=innovarpractica --docker-password=A625aJlp7dVuEDjjg2NdOH6tM0GP75oCaZcGKbbfYc+ACRDVhG6E
+	# hay otra manera de darle credenciales minikube con un yaml este es de la siguiente manera
+		- inicie  
+			minikube ssh
+		- ejecute 
+			docker login innovarpractica.azurecr.io
+		- dirijase al directorio 
+			cat ~/.docker/config.json
+		- convierta esa crendencia a base64
+			base64 -w 0 ~/.docker/config.json
+		- genere y ejecute un secreto conesas credenciales
+			apiVersion: v1
+kind: Secret
+metadata:
+  name: acr-secret
+  namespace : default
+data:
+  .dockerconfigjson: ewoJImF1dGhzIjogewoJCSJpbm5vdmFycHJhY3RpY2EuYXp1cmVjci5pbyI6IHsKCQkJImF1dGgiOiAiYVc1dWIzWmhjbkJ5WVdOMGFXTmhPa0UyTWpWaFNteHdOMlJXZFVWRWFtcG5NazVrVDBnMmRFMHdSMUEzTlc5RFlWcGpSMHRpWW1aWll5dEJRMUpFVm1oSE5rVT0iCgkJfQoJfQp9
+type: kubernetes.io/dockerconfigjson
+		
+#----------------exponer servicio  en minikube
+	-minikube service api
+
+
+kubectl apply -f namespace-secret.yaml
+kubectl apply -f persistentvolume.yaml
+kubectl apply -f deployment-db.yaml
+kubectl apply -f servicios.yaml
+kubectl apply -f deployment-api.yaml
+
+	

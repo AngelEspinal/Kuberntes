@@ -1,0 +1,83 @@
+#----------------------pod db--------------------
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: db-deployment
+<<<<<<< HEAD
+  namespace: practicainnovar
+  #namespace : default
+=======
+  #namespace: practicainnovar
+  namespace : default
+>>>>>>> e5ac38c3d02a6a01853da0e4d2f7c945f9d77090
+  labels:
+    app: db
+spec:
+  selector:
+    matchLabels:
+      app: db
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: db
+    spec:
+      initContainers : 
+        - name: volume-permissions
+          image: busybox
+          command: ["sh", "-c", "chown -R 10001:0 /var/opt/mssql"]
+          volumeMounts:
+          - mountPath: /var/opt/mssql
+            name: mypod
+      volumes:
+        - name: mypod
+          persistentVolumeClaim:
+            claimName: my-pvc
+      containers:
+        - name: db
+          image: mcr.microsoft.com/mssql/server:2022-latest
+          env:
+            - name: MSSQL_PID
+              value: Developer
+            - name: ACCEPT_EULA
+              value: "Y"
+            - name: SA_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: mssql
+                  key: SA_PASSWORD
+          ports:
+            - containerPort: 1433
+              name: db
+          resources:
+            limits:
+              cpu: "2"
+              memory: "3Gi"
+            requests:
+              cpu: "0.5"
+              memory: "512Mi"
+          volumeMounts:
+            - mountPath: /var/opt/mssql/data
+              name: mypod
+              
+<<<<<<< HEAD
+=======
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: db
+  #namespace: practicainnovar
+  namespace : default
+  labels:
+    app: db
+spec:
+  #type: NodePort
+  type: LoadBalancer
+  selector:
+    app: db
+  ports:
+    - protocol: TCP
+      port: 1433
+      targetPort: 1433
+>>>>>>> e5ac38c3d02a6a01853da0e4d2f7c945f9d77090

@@ -1,0 +1,3 @@
+function k {
+    kubectl $args
+}
